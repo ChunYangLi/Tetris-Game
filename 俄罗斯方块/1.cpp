@@ -30,6 +30,11 @@ static byte *block=NULL;        //方块，方块为随机大小，采用动态分配内存方式，所
 byte g_panel[ROWS][COLS]={0};
 ////////////////////////////////////////////////////
 LRESULT CALLBACK WndProc ( HWND,UINT,WPARAM,LPARAM );
+//windows以消息为基础，事件为驱动而运行的，传给制定窗口进行处理，
+//第一个参数：消息传递的窗口
+//第二个参数：消息的ID，即消息的类型
+//第三个和第四个是消息的内容
+
 void DrawPanel ( HDC hdc );     //绘制表格
 void RefreshPanel ( HDC hdc );      //刷新面板
 void DoDownShift ( HDC hdc );       //下移
@@ -47,26 +52,48 @@ bool IsTouchBottom ( HDC hdc );         //判断是否到达底部
  
 int main()
 {
-    HINSTANCE hInstance=GetModuleHandle ( NULL );
+	//句柄
+	//当你启动一个程序时，操作系统会将这个程序装载到某个内存空间，这个空间的起始地址就是HInstance。
+    //获取当前进程的句柄
+	HINSTANCE hInstance=GetModuleHandle ( NULL );
+
+	//c++的字符处理方法，可以根据编译环境灵活处理字符串
+	//char 或者 wchar_t
+    //ANSI 和Unicode
     TCHAR szAppName[]=TEXT ( "俄罗斯方块" );
     MSG msg;
+	//windows窗口的全部信息,定义一个窗口类，来确定窗口的属性
     WNDCLASS wc;
- 
+   //窗口类型
+
     wc.style=CS_HREDRAW|CS_VREDRAW;
+	//窗口处理函数
     wc.lpfnWndProc=WndProc;
+	//窗口扩展
     wc.cbClsExtra=0;
+	//窗口实例扩展
     wc.cbWndExtra=0;
+   //窗口句柄
     wc.hInstance=hInstance;
+	//窗口最小化图标
     wc.hIcon=LoadIcon ( NULL,IDI_APPLICATION );
+	//窗口的鼠标光标
     wc.hCursor=LoadCursor ( NULL,IDC_ARROW );
-    wc.hbrBackground= ( HBRUSH ) GetStockObject ( WHITE_BRUSH );
+	//窗口的背景颜色
+   // wc.hbrBackground= ( HBRUSH ) GetStockObject ( WHITE_BRUSH );
+	wc.hbrBackground = CreateSolidBrush(RGB(192,192,192));
+	//窗口菜单
     wc.lpszMenuName=NULL;
+
     wc.lpszClassName=szAppName;
+
+	//若没有注册该窗口应用程序
     if ( !RegisterClass ( &wc ) )
     {
         printf ( "RegisterClass occur errors!" );
         return 0;
     }
+
     hwnd=CreateWindow ( szAppName,TEXT ( "俄罗斯方块" ),
                         WS_OVERLAPPEDWINDOW,
                         0,0,0,0,
@@ -174,6 +201,7 @@ void DoRedirection ( HDC hdc )      //改变方向
     if ( NULL==block ) return;
     if ( cur_top<0 ) return;     //方块完整显示前不能转向
  
+	//初始化一个空间,最大旋转空间，是一个矩形范围
     temp= ( byte * ) malloc ( sizeof ( byte ) *width_block*height_block );
     for ( i=0; i<width_block; i++ )
     {
